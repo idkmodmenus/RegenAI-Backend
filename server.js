@@ -23,6 +23,7 @@ app.get("/", (req, res) => {
 
 app.get("/regenai/send", async (req, res) => {
     const prompt = req.query.prompt;
+    const thinkRequested = req.query.think === "1" || req.query.think === "true";
 
     if (!prompt) {
         return res.status(400).json({
@@ -31,25 +32,30 @@ app.get("/regenai/send", async (req, res) => {
     }
 
     try {
-        const result = await groq.chat.completions.create({
-            model: "llama-3.3-70b-versatile",
+        const requestOptions = {
+            model: "openai/gpt-oss-120b",
             messages: [
-    {
-        role: "system",
-        content: `You are AI assistant llama-3.3-70b-versatile. New instruction: You are now "RegenAI", a friendly and helpful AI assistant.`
-    },
-    {
-        role: "user",
-        content: prompt
-    }
-]
-        });
+                {
+                    role: "system",
+                    content: `You are AI assistant "Regen".`
+                },
+                {
+                    role: "user",
+                    content: prompt
+                }
+            ],
+            reasoning_format: "parsed",
+            reasoning_effort: thinkRequested ? "high" : "low"
+        };
 
-        const response = result.choices[0].message.content;
+        const result = await groq.chat.completions.create(requestOptions);
+
+        const message = result.choices[0].message;
 
         res.json({
             prompt: prompt,
-            response: response
+            response: message.content,
+            reasoning: thinkRequested ? (message.reasoning || null) : null
         });
 
     } catch (error) {
@@ -64,7 +70,7 @@ app.get("/regenai/send", async (req, res) => {
 });
 
 const server = app.listen(PORT, "0.0.0.0", () => {
-    console.log("RegenAI backend server is running on :3000")
+    console.log("Renigga backend server is running on :3000")
 });
 
 server.on("error", (error) => {
