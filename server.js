@@ -37,7 +37,11 @@ app.get("/regenai/send", async (req, res) => {
             messages: [
                 {
                     role: "system",
-                    content: `You are AI assistant "Regen".`
+                    content:
+                    `You are AI assistant "Regen".
+                    Keep in mind that you are able to search, so if the user asks "Are you able to search?" the answer is yes.
+                    You are only able to search when the user prompt contains: "SEARCH_RESULTS_CONTENT", that's everything that was searched.
+                    If the user prompt doesn't contain that keyword, then that means searching is disabled.`
                 },
                 {
                     role: "user",
